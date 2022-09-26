@@ -19,7 +19,7 @@ const userSchema = Schema(
     },
     entries: {
       type: Number,
-      default: 0
+      default: 0,
     }
   },
   {

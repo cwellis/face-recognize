@@ -7,7 +7,7 @@ const User = require('../models/userModel')
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body
+  const { name, email, password, entries } = req.body
 
   if (!name || !email || !password) {
     res.status(400)
@@ -31,6 +31,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    entries,
   })
 
   if (user) {
@@ -39,6 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
+      entries: user.entries,
     })
   } else {
     res.status(400)
@@ -61,11 +63,35 @@ const loginUser = asyncHandler(async (req, res) => {
       name: user.name,
       email: user.email,
       token: generateToken(user._id),
+      entries: 0,
     })
   } else {
     res.status(400)
     throw new Error('Invalid credentials')
   }
+})
+
+// @desc Update user entries
+const updateUser = asyncHandler(async (req, res) => {
+
+  const user = await User.findById(req.params.id)
+  
+  if (!user) {
+    res.status(400)
+    throw new Error('User not found')
+  }
+
+  // Check for user
+  if (!req.user) {
+    res.status(401)
+    throw new Error('User not found')
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  })
+
+  res.status(200).json(updatedUser)
 })
 
 // @desc    Get user data
@@ -86,4 +112,5 @@ module.exports = {
   registerUser,
   loginUser,
   getMe,
+  updateUser
 }
